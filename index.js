@@ -1,30 +1,35 @@
-let http = require("http");
-let fs = require("fs");
-let server = http.createServer((req, res) => {
-  console.log(req.url);
+const express = require("express");
+const app = express();
+app.set("view engine", "ejs");
 
-  if (req.url == "/") {
-    fs.readFile("index.html", (err, html) => {
-      res.write(html);
-      res.end();
-    });
-    //     res.write("<h1>asdasdasd</h1>");
-  } else if (req.url == "/urunler") {
-    fs.readFile("products.html", (err, html) => {
-      res.write(html);
-      res.end();
-    });
-    //     res.write("<h1>urunler</h1>");
-  } else {
-    fs.readFile("404.html", (err, html) => {
-      res.write(html);
-      res.end();
-    });
-    //     res.write("<h1> sayfa bulunamadi</h1>");
-  }
+const db = require("./data/db");
 
+let data = [
+  { id: 1, name: "iphone 14", price: 1400 },
+  { id: 2, name: "iphone 11", price: 400 },
+  { id: 3, name: "iphone 14", price: 1800 },
+];
+
+app.use("/products/:id", (req, res) => {
+  res.render("product-details");
 });
 
-server.listen(5000, () => {
-  console.log("http://localhost:5000 asdadsasd");
+app.use("/products", (req, res) => {
+  res.render("products", {
+    urunler: data,
+  });
+});
+app.use("/", (req, res) => {
+  db.execute("select * from products")
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  res.render("index");
+});
+app.listen(5001, () => {
+  console.log("litenining on port http://localhost:5001");
 });
